@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Moirai+One&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Moirai One";
+    background-color: #1F2235;
+}
+
+.acess_key {
+    float: left;
+    width: 50%;
+    margin-top: 20px;
+    margin-left: 5px;
+    font-family: Arial;
+    font-size: 14px;
+    color: white;
+    text-align: justify;
+}
+
+.left {
+    margin-left: 50%;
+}
