@@ -3,7 +3,6 @@ from customtkinter import *
 import tkinter as tk
 import tkinter as font
 import os
-import webbrowser
 
 # ANOTAÇÕES PARA OS DEV:
 
@@ -34,6 +33,22 @@ banco_user = {}
 
 x = width / 2
 y = height / 2
+
+def back(clear_window, voltar):
+    clear_window()
+    voltar()
+
+# Button to return pages
+def button_back():
+    button_frame = CTkFrame(master=app)
+    button_frame.place_configure(relx=0.05, rely=0.05, width=50, height=50)
+    button_back = CTkButton(button_frame, text="<", corner_radius=32, command=lambda: back(clear_window, voltar))
+    button_back.pack()
+
+# Limpar a tela:
+def clear_window():
+    for widget in app.winfo_children():
+        widget.destroy()
 
 # Função que abre arquivo:
 def open_user_file(logged_in_username):
@@ -86,8 +101,9 @@ def create_user_folder(username, password):
     with open(file_path_key, 'w') as file:
         file.write(f"")
 
-def clear_entry(entry):
-    entry.delete(0, 'end')
+# Limpa os campos usados:
+# def clear_entry(entry):
+#     entry.delete(0, 'end')
 
 def limpa_campo(campo):
     campo = ""
@@ -98,8 +114,25 @@ def destruir_entrada():
         entrada.destroy()
     entradas.clear()
 
+def frames_hide():
+    for frame in [inserir_frame, acessar_frame, editar_frame, remover_frame]:
+        if frame:
+            frame.place_forget()
+
+# Definir as variáveis das frames globalmente
+inserir_frame = None
+acessar_frame = None
+editar_frame = None
+remover_frame = None
 
 def selecionar_opcao(opcao):
+    global inserir_frame, acessar_frame, editar_frame, remover_frame
+
+    # Esconder todas as frames
+    for frame in [inserir_frame, acessar_frame, editar_frame, remover_frame]:
+        if frame:
+            frame.place_forget()
+
     if opcao.strip() == "Inserir":
         inserir_nome()
     elif opcao.strip() == "Acessar":
@@ -113,13 +146,16 @@ def selecionar_opcao(opcao):
     elif opcao.strip() == "Sair":
         app.quit()
 
+
 def help_user(event=None):
     with app_flask.app_context():
         return render_template("index.html")
 
 def remover():
-    destruir_entrada()
-    voltar()
+    clear_window()
+    button_back()
+    button_back()
+
 
     remover_frame = CTkFrame(master=app)
     remover_frame.place_configure(janela_acesso)
@@ -175,8 +211,7 @@ def remover():
 
 
 def editar():
-    destruir_entrada()
-    voltar()
+    clear_window()
 
     editar_frame = CTkFrame(master=app)
     editar_frame.place_configure(janela_acesso)
@@ -234,8 +269,7 @@ def editar():
 #================================================================================================================================================#
 
 def acessar_GUI():
-    destruir_entrada()
-    voltar()
+    clear_window()
 
     text_central_in_app()
 
@@ -291,8 +325,8 @@ def acessar_GUI():
 #================================================================================================================================================#
 
 def inserir_nome():
-    destruir_entrada()
-    voltar()
+
+    clear_window()
 
     text_central_in_app()
 
@@ -340,28 +374,36 @@ def inserir_nome():
 #================================================================================================================================================#
 
 
-def voltar():
+def voltar(offset=0):
+
     clear_window()
 
     opcoes = ['Inserir', 'Acessar', 'Editar', 'Remover', 'Sair']
 
-    x_position = 0
-    y_position = 0
+    # Centralizar horizontalmente
+    x_position = width / 2
 
-    y_calculo = height/len(opcoes)
+    # Definir a posição inicial Y logo abaixo do texto central
+    initial_y_offset = 100  # Ajuste conforme necessário
+    space_between_buttons = 20  # Espaçamento reduzido entre os botões
+
+    # Posição inicial Y
+    y_position = initial_y_offset
+
+    # Adicionar o texto central
+    text_central = tk.Label(app, text="Gerenciador de Senhas", bg="#242424", fg="white", font=("Helvetica", 16))
+    text_central.place_configure(relx=0.5, rely=0.05, anchor="n")
 
     for opcao in opcoes:
-        botao = CTkButton(app, text=opcao, width=240, height=120, command=lambda opcao=opcao: selecionar_opcao(opcao), corner_radius=0, hover=True, border_color="black", font=("Arial", 20), bg_color="#242424", fg_color="black")
-        botao.place(x=x_position, y=y_position)
+        botao = CTkButton(app, text=opcao, width=240, height=60, command=lambda opcao=opcao: selecionar_opcao(opcao), corner_radius=0, hover=True, border_color="black", font=("Arial", 20), bg_color="#242424", fg_color="black")
+        botao.place(x=x_position, y=y_position, anchor="center")
 
-        y_position += y_calculo
-    text_central = tk.Label(app, text="Gerenciador de Senhas", bg="#242424", fg="white", font=("Helvetica", 16))
-    text_central.place_configure(relx=0.65, rely=0.05, anchor=N)
+        y_position += 60 + space_between_buttons
 
+# ======================================================= Área de Registro e Login ======================================================= # 
 
 def registrar():
     return inserir_nome()
-
 
 def login_screen(event=None):
     global logged_in_username, logged_in_password
@@ -468,22 +510,21 @@ def register_screen(event=None):
     register_button_to_login.bind("<Button-1>", login_screen)
 
 
-def clear_window():
-    for widget in app.winfo_children():
-        widget.destroy()
-
-
 # Iniciando...
-app = CTk()
-app.title("Gerenciador de Senhas")
-app.geometry(f"{width}x{height}")
-app._set_appearance_mode("dark")
-app.resizable(width=False, height=False)
-# BackGround()
 
-register_screen()
-login_screen_data = ['Login_User']
-position_login_x = 0.5
-position_login_y = 0.2
+if __name__ == "__main__":
+    app = CTk()
+    app.title("Gerenciador de Senhas")
+    app.geometry(f"{width}x{height}")
+    app.configure(bg="#242424")
+    app.resizable(width=False, height=False)
 
-app.mainloop()
+    register_screen()
+    app.mainloop()
+    login_screen_data = ['Login_User']
+    position_login_x = 0.5
+    position_login_y = 0.2
+
+
+
+
